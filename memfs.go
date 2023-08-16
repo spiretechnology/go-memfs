@@ -95,7 +95,7 @@ func (f FS) ReadDir(name string) ([]fs.DirEntry, error) {
 	}
 
 	// If there are no entries, and also no empty dir nodes, return an error
-	if len(entries) == 0 && !hasEntry {
+	if len(entries) == 0 && !hasEntry && trimmed != "" {
 		return nil, fs.ErrNotExist
 	}
 
