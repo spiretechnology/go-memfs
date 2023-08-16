@@ -72,12 +72,19 @@ func TestMemFS(t *testing.T) {
 		_, err := fsys.Open("hello/world")
 		require.Error(t, err, "opening directory")
 	})
-	t.Run("attempting Open() on a directory", func(t *testing.T) {
+	t.Run("attempting ReadDir() on a file", func(t *testing.T) {
 		fsys := memfs.FS{
 			"hello/world/testfile.txt": memfs.File("bar"),
 		}
-		_, err := fsys.Open("hello/world")
-		require.Error(t, err, "opening directory")
+		_, err := fsys.ReadDir("hello/world/testfile.txt")
+		require.Error(t, err, "readdir a file")
+	})
+	t.Run("attempting ReadDir() on a directory that doesn't exist", func(t *testing.T) {
+		fsys := memfs.FS{
+			"hello/world/testfile.txt": memfs.File("bar"),
+		}
+		_, err := fsys.ReadDir("hello/doesntexist")
+		require.Error(t, err, "readdir a non-existent directory")
 	})
 	t.Run("adding files", func(t *testing.T) {
 		fsys := memfs.FS{

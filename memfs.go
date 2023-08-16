@@ -94,6 +94,11 @@ func (f FS) ReadDir(name string) ([]fs.DirEntry, error) {
 		entries = append(entries, entry.ToEntry(suffix))
 	}
 
+	// If there are no entries, and also no empty dir nodes, return an error
+	if len(entries) == 0 && !hasEntry {
+		return nil, fs.ErrNotExist
+	}
+
 	// Sort the entries by name
 	slices.SortFunc(entries, func(a, b fs.DirEntry) int {
 		return strings.Compare(a.Name(), b.Name())
