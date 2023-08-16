@@ -152,4 +152,44 @@ func TestMemFS(t *testing.T) {
 		require.NoError(t, err, "reading dir")
 		require.Len(t, entries, 3, "reading dir")
 	})
+	t.Run("reading nested directories", func(t *testing.T) {
+		fsys := memfs.FS{
+			"hello/foo/a":       memfs.File(""),
+			"hello/foo/bar/a":   memfs.File(""),
+			"hello/foo/bar/baz": memfs.Dir{},
+			"hello/bar/a":       memfs.File(""),
+		}
+
+		entries, err := fsys.ReadDir(".")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{"hello"}, entryNames(entries), "reading dir")
+
+		entries, err = fsys.ReadDir("hello")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{"bar", "foo"}, entryNames(entries), "reading dir")
+
+		entries, err = fsys.ReadDir("hello/foo")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{"a", "bar"}, entryNames(entries), "reading dir")
+
+		entries, err = fsys.ReadDir("hello/foo/bar")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{"a", "baz"}, entryNames(entries), "reading dir")
+
+		entries, err = fsys.ReadDir("hello/foo/bar/baz")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{}, entryNames(entries), "reading dir")
+
+		entries, err = fsys.ReadDir("hello/bar")
+		require.NoError(t, err, "reading dir")
+		require.ElementsMatch(t, []string{"a"}, entryNames(entries), "reading dir")
+	})
+}
+
+func entryNames(entries []fs.DirEntry) []string {
+	names := make([]string, len(entries))
+	for i, entry := range entries {
+		names[i] = entry.Name()
+	}
+	return names
 }
