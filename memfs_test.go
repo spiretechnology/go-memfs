@@ -86,6 +86,11 @@ func TestMemFS(t *testing.T) {
 		_, err := fsys.ReadDir("hello/doesntexist")
 		require.Error(t, err, "readdir a non-existent directory")
 	})
+	t.Run("attempting ReadDir() on empty root directory", func(t *testing.T) {
+		fsys := memfs.FS{}
+		_, err := fsys.ReadDir(".")
+		require.NoError(t, err, "readdir empty root directory")
+	})
 	t.Run("adding files", func(t *testing.T) {
 		fsys := memfs.FS{
 			"hello/foo.txt": memfs.File("hello"),
