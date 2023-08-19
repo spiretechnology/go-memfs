@@ -184,6 +184,27 @@ func TestMemFS(t *testing.T) {
 		require.NoError(t, err, "reading dir")
 		require.ElementsMatch(t, []string{"a"}, entryNames(entries), "reading dir")
 	})
+	t.Run("stat files and directories", func(t *testing.T) {
+		fsys := memfs.FS{
+			"hello/foo/a":       memfs.File("helloworld"),
+			"hello/foo/bar/baz": memfs.Dir{},
+		}
+
+		stat, err := fsys.Stat("hello/foo/a")
+		require.NoError(t, err, "stat file")
+		require.Equal(t, "a", stat.Name(), "stat file name")
+		require.Equal(t, false, stat.IsDir(), "stat file is not dir")
+		require.Equal(t, int64(10), stat.Size(), "stat file size")
+
+		stat, err = fsys.Stat("hello/foo/bar/baz")
+		require.NoError(t, err, "stat dir")
+		require.Equal(t, "baz", stat.Name(), "stat dir name")
+		require.Equal(t, true, stat.IsDir(), "stat dir is dir")
+
+		stat, err = fsys.Stat("hello/foo/doesntexist")
+		require.Error(t, err, "stat non-existent file")
+		require.Nil(t, stat, "stat non-existent file")
+	})
 }
 
 func entryNames(entries []fs.DirEntry) []string {
